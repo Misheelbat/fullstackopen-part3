@@ -1,3 +1,4 @@
+const { request } = require("express");
 const express = require("express");
 const nodemon = require("nodemon");
 const app = express();
@@ -25,17 +26,74 @@ let persons = [
   },
 ];
 
+// get homepage
 app.get("/", (request, response) => {
   response.send("<h1>Hello World</h1>");
 });
+
+// get all persons
 app.get("/api/persons", (request, response) => {
   response.json(persons);
 });
+
+// get number of entry in the phonebook
 app.get("/info", (request, response) => {
   response.send(`
     <div>Phonebook has info for ${persons.length} people</div>
     <div>${new Date()}</div>
     `);
+});
+
+// get single person entry
+app.get("/api/persons/:id", (request, response) => {
+  const id = Number(request.params.id);
+  const person = persons.find((person) => person.id === id);
+  if (person) {
+    response.json(person);
+  } else {
+    response.status(404).end();
+  }
+});
+
+// delete from persons
+app.delete("/api/persons/:id", (request, response) => {
+  const id = Number(request.params.id);
+  persons = persons.filter((person) => person.id !== id);
+  response.status(204).end();
+});
+
+// create new person
+
+const generateId = () => {
+  const id = Math.floor(Math.random() * 100);
+  return id;
+};
+
+app.post("/api/persons", (request, response) => {
+  const body = request.body;
+  if (!body) {
+    return response.status(400).json({
+      error: "content missing",
+    });
+  }
+  if (!body.name || !body.number) {
+    return response.status(400).json({
+      error: "name or number is missing",
+    });
+  } else if (persons.some((p) => p.name === body.name)) {
+    return response.status(400).json({
+      error: "name must be unique",
+    });
+  }
+
+  const person = {
+    id: generateId(),
+    name: body.name,
+    number: body.number,
+  };
+
+  persons = persons.concat(person);
+  response.json(person);
 });
 
 const PORT = 3001;
