@@ -1,9 +1,7 @@
-const { request } = require("express");
 const express = require("express");
-const nodemon = require("nodemon");
-const morgan = require("morgan");
-const cors = require("cors");
 const app = express();
+const cors = require("cors");
+const morgan = require("morgan");
 app.use(cors());
 app.use(express.json());
 
@@ -47,7 +45,7 @@ let persons = [
 // get homepage
 app.get("/", (request, response) => {
   response.send("<h1>Hello World</h1>");
-});
+}); 
 
 // get all persons
 app.get("/api/persons", (request, response) => {
