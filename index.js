@@ -2,7 +2,9 @@ const { request } = require("express");
 const express = require("express");
 const nodemon = require("nodemon");
 const morgan = require("morgan");
+const cors = require("cors");
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 app.use(
@@ -112,7 +114,7 @@ app.post("/api/persons", (request, response) => {
   response.json(person);
 });
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
