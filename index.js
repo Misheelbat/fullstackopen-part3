@@ -43,10 +43,6 @@ let persons = [
   },
 ];
 
-// get homepage
-app.get("/", (request, response) => {
-  response.send("<h1>Hello World</h1>");
-});
 
 // get all persons
 app.get("/api/persons", (request, response) => {
