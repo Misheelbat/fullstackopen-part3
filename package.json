@@ -21,7 +21,9 @@
   "homepage": "https://github.com/Misheelbat/fullstackopen-part3#readme",
   "dependencies": {
     "cors": "^2.8.5",
+    "dotenv": "^14.2.0",
     "express": "^4.17.2",
+    "mongoose": "^6.1.7",
     "morgan": "^1.10.0"
   },
   "proxy": "http://localhost:3001",
