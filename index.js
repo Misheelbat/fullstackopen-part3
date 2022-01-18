@@ -4,6 +4,7 @@ const cors = require("cors");
 require("dotenv").config();
 const morgan = require("morgan");
 const Person = require("./models/person");
+const uniqueValidator = require("mongoose-unique-validator");
 
 // all middleware
 app.use(cors());
@@ -26,10 +27,10 @@ app.use(
 );
 
 // get all persons
-app.get("/api/persons", (request, response) => {
+app.get("/api/persons", (request, response, next) => {
   Person.find({})
     .then((persons) => {
-      response.json(persons);
+      response.json(persons.map((p) => p.toJSON()));
     })
     .catch((err) => next(err));
 });
@@ -49,12 +50,12 @@ app.get("/api/persons/:id", (request, response, next) => {
   Person.findById(request.params.id)
     .then((person) => {
       if (person) {
-        response.json(person);
+        response.json(person.toJSON());
       } else {
         response.status(404).end();
       }
     })
-    .catch((err) => next(error));
+    .catch((err) => next(err));
 });
 
 // delete from persons
@@ -75,17 +76,6 @@ app.post("/api/persons", (request, response, next) => {
       error: "content missing",
     });
   }
-
-  /* if (!body.name || !body.number) {
-    return response.status(400).json({
-      error: "name or number is missing",
-    });
-  }else if (persons.some((p) => p.name === body.name)) {
-    return response.status(400).json({
-      error: "name must be unique",
-    });
-  } */
-
   const person = new Person({
     name: body.name,
     number: body.number,
@@ -93,9 +83,11 @@ app.post("/api/persons", (request, response, next) => {
 
   person
     .save()
-    .then((savedPerson) => {
-      response.json(savedPerson);
+    .then((savedPerson) => savedPerson.toJSON())
+    .then((formattedPerson) => {
+      response.json(formattedPerson);
     })
+
     .catch((err) => next(err));
 });
 
@@ -108,8 +100,8 @@ app.put("/api/persons/:id", (request, response, next) => {
   };
 
   Person.findByIdAndUpdate(request.params.id, person, { new: true })
-    .then((updatedPerson) => {
-      response.json(updatedPerson);
+    .then((person) => {
+      response.json(person.toJSON());
     })
     .catch((err) => next(err));
 });
@@ -119,6 +111,8 @@ const errorHandler = (error, request, response, next) => {
   console.log(error.message);
   if (error.name === "CastError") {
     return response.status(400).send({ error: "malformatted id" });
+  } else if (error.name === "ValidationError") {
+    return response.status(400).json({ error: error.message });
   }
   next(error);
 };
